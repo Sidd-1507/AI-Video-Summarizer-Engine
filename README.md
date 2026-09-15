@@ -1,42 +1,51 @@
-# Exam Notes AI
+# AI Video Summarizer Engine
 
-Docs: see `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/TECH_STACK.md`, `docs/DATABASE_DESIGN.md`, `docs/SECURITY_REVIEW.md`.
+Web app that turns a YouTube lecture (or a syllabus topic) into structured study notes: sections, revision points, and exam-style questions. The same note can be opened as an article, a mind map, flashcards, or a quiz.
 
-This milestone implements the **YouTube → Transcript → Notes** backend feature end-to-end
-(transcript fetch → LLM notes generation → persistence → credits), with unit + integration tests.
+It is a Vite/React frontend and an Express API with MongoDB. You create an account with email and password. New accounts start with 100 credits. Generating notes from a video costs credits.
+
+## How a YouTube link is processed
+
+1. The URL is checked and the 11-character video id is taken from it (ids that start with `-` are valid).
+2. Captions are fetched for that video.
+3. If a Gemini (or OpenAI) key is set, the transcript is sent to the model and parsed into the note schema.
+4. If no key is set, the captions are still split into titled sections so the page is usable.
+5. The note is stored on the user account.
+
+Without captions the request fails and credits are refunded.
+
+## Run locally
+
+You need Node.js, MongoDB on `localhost:27017`, and (optional) Redis.
+
+```bash
+# API
+cd backend
+cp .env.example .env
+# set MONGODB_URI, JWT_SECRET, and GEMINI_API_KEY if you have one
+npm install
+npm run start:api
+```
+
+```bash
+# UI
+cd frontend
+cp .env.example .env
+# VITE_API_BASE_URL=http://localhost:8000
+npm install
+npm run dev
+```
+
+Open http://localhost:5173, create an account, paste a YouTube URL, generate.
+
+Firebase Google login is optional. Leave those env vars empty if you are only using email/password.
 
 ## Layout
+
 ```
-backend/
-  src/
-    models/         Mongoose schemas (User, Note, Transcript)
-    services/        Business logic: transcript fetch, LLM orchestration, credits, the feature orchestrator
-    controllers/     HTTP handlers
-    middleware/      Auth, validation, rate limiting
-    routes/          Express routers
-    utils/           URL parsing/validation
-    app.js           Express app factory (dependency-injected, used by both server & tests)
-    __tests__/       Jest test suites
+backend/   Express API (auth, notes, credits, jobs)
+frontend/  Vite + React UI
+docs/      longer design notes
 ```
 
-## Running it
-```bash
-cd backend
-cp .env.example .env   # fill in real values
-npm install
-npm test                # unit tests run standalone; DB-integration tests need network access
-                         # to download a mongod binary on first run (mongodb-memory-server)
-```
-
-## Test coverage in this pass
-- `youtubeUrl.test.js` — URL validation incl. SSRF/injection-style adversarial inputs (pure logic, no DB).
-- `youtubeTranscriptService.test.js` — caption normalization, malformed/huge input handling (pure logic, no DB).
-- `llmNotesService.test.js` — prompt/response schema validation, chunking, retries, adversarial LLM output (pure logic, no DB).
-- `creditService.test.js` — atomic reserve/refund, concurrency race safety (needs MongoDB).
-- `youtubeNotesOrchestrator.test.js` — full pipeline incl. refund-on-failure at every stage, cross-user isolation (needs MongoDB).
-- `youtubeNotes.http.test.js` — HTTP-level: auth, validation, rate limiting, payload limits, error-leak checks (needs MongoDB).
-
-The first three suites (35 tests) run with zero external dependencies and were verified passing
-in this environment. The MongoDB-backed suites are complete and correct but require downloading
-a `mongod` binary on first run, which this sandbox's restricted network egress blocks — they'll
-run normally in a standard dev machine or CI with network access.
+Copy `backend/.env.example` and `frontend/.env.example`. Do not commit real `.env` files.
