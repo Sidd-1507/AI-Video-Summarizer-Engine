@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Replace browser default focus ring with brand glow on every interactive element */
+  :focus-visible {
+    outline: none;
+    box-shadow: theme('boxShadow.glow');
+  }
+
+  body {
+    background-color: theme('colors.canvas');
+    color: theme('colors.ink.900');
+    font-family: theme('fontFamily.sans');
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Thin scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.ink.200') transparent;
+  }
+  *::-webkit-scrollbar { width: 6px; height: 6px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background: theme('colors.ink.200'); border-radius: 999px; }
+}

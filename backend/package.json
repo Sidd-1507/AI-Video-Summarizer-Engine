@@ -1,0 +1,39 @@
+{
+  "name": "exam-notes-ai-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start:api": "node src/server.js",
+    "start:worker": "node src/workers/youtubeNotesWorker.js",
+    "test": "jest --runInBand --forceExit",
+    "test:unit": "jest --runInBand --selectProjects unit",
+    "test:integration": "jest --runInBand --selectProjects integration",
+    "test:watch": "jest --watch",
+    "lint": "eslint src",
+    "test:phase4": "jest --runInBand --selectProjects phase4",
+    "test:all": "jest --runInBand --selectProjects unit integration phase4"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongoose": "^8.5.0",
+    "express-rate-limit": "^7.4.0",
+    "zod": "^3.23.8",
+    "firebase-admin": "^12.3.0",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "express-mongo-sanitize": "^2.2.0",
+    "uuid": "^9.0.1",
+    "dotenv": "^16.4.5",
+    "@google/generative-ai": "^0.21.0",
+    "bullmq": "^5.13.0",
+    "ioredis": "^5.4.1",
+    "stripe": "^16.12.0",
+    "youtube-transcript": "^1.2.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0",
+    "mongodb-memory-server": "^9.4.0"
+  }
+}
